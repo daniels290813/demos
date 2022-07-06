@@ -1,4 +1,3 @@
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -108,7 +107,6 @@ def train_stocks(context,
     # creating the model
     model = Model(input_size=input_size, output_size=output_size, hidden_dim=hidden_dim, n_layers=n_layers,batch_size=batch_size,seq_size=seq_size)
     
-#     mlrun_torch = PyTorchMLRunInterface(model=model, context=context).add_auto_logging_callbacks()
     # Initialize the optimizer:
     optimizer = torch.optim.Adam(lr=0.0001, params=model.parameters())
     criterion = nn.MSELoss()
@@ -117,7 +115,7 @@ def train_stocks(context,
     mlrun_pytorch.train(model=model,
                         training_set=training_set,
                         validation_set=training_set,
-                        training_iterations=35,
+                        training_iterations=5,
                         loss_function=criterion,
                         optimizer=optimizer,
                         epochs=epochs,
