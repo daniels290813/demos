@@ -6,9 +6,16 @@ import mlrun
 # Create a Kubeflow Pipelines pipeline
 @dsl.pipeline(name="breast-cancer-demo")
 def pipeline(model_name="cancer_classifier"):
+    
+    framework = 'sklearn'  # change to 'keras' to try the 2nd option 
+    if framework == "sklearn":
+        serving_class = 'mlrun.frameworks.sklearn.SklearnModelServer'
+    else:
+        serving_class = 'mlrun.frameworks.tf_keras.TFKerasModelServer'
+        
     # run the ingestion function with the new image and params
     ingest = mlrun.run_function(
-        "gen-breast-cancer",
+        "get-data",
         name="get-data",
         params={"format": "pq", "model_name": model_name},
         outputs=["dataset"],
@@ -28,7 +35,7 @@ def pipeline(model_name="cancer_classifier"):
             {
                 "key": model_name,
                 "model_path": train.outputs["model"],
-                "class_name": "ClassifierModel",
+                "class_name": serving_class,
             }
         ],
     )
