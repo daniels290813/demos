@@ -11,7 +11,9 @@ for gpu in tf.config.experimental.list_physical_devices("GPU"):
 
 import mlrun
 import mlrun.frameworks.tf_keras as mlrun_tf_keras
-
+import boto3
+from urllib.parse import urlparse
+from PIL import Image
 
 def _get_datasets(
     dataset_path: str, batch_size: int, is_evaluation: bool = False,
@@ -25,43 +27,70 @@ def _get_datasets(
 
     :returns: If is_evaluation is False, a tuple of (Training dataset, Validation dataset). Otherwise, the Evaluation
               dataset.
-    """
+    """      
     # Build the dataset going through the classes directories and collecting the images:
     images = []
     labels = []
-    for label, directory in enumerate(["with_mask", "without_mask"]):
-        images_directory = os.path.join(dataset_path, directory)
-        images_files = [
-            os.path.join(images_directory, file)
-            for file in os.listdir(images_directory)
-            if os.path.isfile(os.path.join(images_directory, file))
-        ]
-        for image_file in images_files:
-            image = keras.preprocessing.image.load_img(
-                image_file, target_size=(224, 224)
-            )
-            image = keras.preprocessing.image.img_to_array(image)
-            image = keras.applications.mobilenet_v2.preprocess_input(image)
-            images.append(image)
-            labels.append(label)
+    ####################################################################################################
+    ############################################# using s3 #############################################
+    ####################################################################################################
+    if(os.environ.get('S3_ENDPOINT_URL')):
+        parsed_url = urlparse(dataset_path)
+        if('minio' in os.environ.get('S3_ENDPOINT_URL')):
+            client = boto3.client('s3', endpoint_url = os.environ.get('S3_ENDPOINT_URL')) 
+        else:
+            client = boto3.client('s3')
+        
+        for label, directory in enumerate(["with_mask", "without_mask"]):
+            images_directory = os.path.join(dataset_path, directory)
+            image_files = client.list_objects(Bucket=parsed_url.netloc, Prefix=parsed_url.path[1:] + '/' + directory)
+            print(parsed_url.netloc, parsed_url.path[1:] + '/' + directory)
+            for o in image_files['Contents']:
+                if('jpg' in o['Key']):
+                    image = client.get_object(Bucket=parsed_url.netloc, Key=o.get('Key'))['Body']
+                    image = np.array(Image.open(image))
+                    image = tf.image.resize(image, (224, 224))
+                    image = keras.applications.mobilenet_v2.preprocess_input(image)
+                    images.append(image)
+                    labels.append(label)
+    ####################################################################################################
+    ####################################### using local filesystem #####################################
+    ####################################################################################################
+    else:  
+        for label, directory in enumerate(["with_mask", "without_mask"]):
+            images_directory = os.path.join(dataset_path, directory)
+            images_files = [
+                os.path.join(images_directory, file)
+                for file in os.listdir(images_directory)
+                if os.path.isfile(os.path.join(images_directory, file))
+            ]
+            for image_file in images_files:
+                image = keras.preprocessing.image.load_img(
+                    image_file, target_size=(224, 224)
+                )
+                image = keras.preprocessing.image.img_to_array(image)
+                image = keras.applications.mobilenet_v2.preprocess_input(image)
+                images.append(image)
+                labels.append(label)
 
     # Convert the images and labels to NumPy arrays
+    print('done collecting images')
     images = np.array(images, dtype="float32")
     labels = np.array(labels)
-
+    print('done collecting images')
     # Perform one-hot encoding on the labels:
     labels = LabelBinarizer().fit_transform(labels)
     labels = keras.utils.to_categorical(labels)
-
+    print('done collecting images')
     # Check if its an evaluation, if so, use the entire data:
     if is_evaluation:
         return images, labels
-
+    
     # Split the dataset into training and validation sets:
     x_train, x_test, y_train, y_test = train_test_split(
-        images, labels, test_size=0.2, stratify=labels, random_state=42,
+        images, labels, test_size=0.2
     )
-
+    print('done collecting images')
     # Construct the training image generator for data augmentation:
     image_data_generator = keras.preprocessing.image.ImageDataGenerator(
         rotation_range=20,
@@ -72,7 +101,7 @@ def _get_datasets(
         horizontal_flip=True,
         fill_mode="nearest",
     )
-
+    print('done collecting images')
     return (
         image_data_generator.flow(x_train, y_train, batch_size=batch_size),
         (x_test, y_test),
