@@ -1,0 +1,12 @@
+kind: project
+metadata:
+  name: apply-mlrun-tutorial-jovyan
+  created: '2022-08-24T10:47:58.798741'
+spec:
+  functions: []
+  workflows: []
+  artifacts: []
+  source: ''
+  desired_state: online
+status:
+  state: online
