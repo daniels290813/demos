@@ -19,6 +19,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow import keras
+import zipfile
 
 for gpu in tf.config.experimental.list_physical_devices("GPU"):
     tf.config.experimental.set_memory_growth(gpu, True)
@@ -40,6 +41,18 @@ def _get_datasets(
     :returns: If is_evaluation is False, a tuple of (Training dataset, Validation dataset). Otherwise, the Evaluation
               dataset.
     """
+    # When running on CE, data has to be fetched.
+    if not os.path.exists(dataset_path):
+        archive_url = mlrun.get_sample_path("data/prajnasb-generated-mask-detection/prajnasb_generated_mask_detection.zip")
+        archive_url = mlrun.get_dataitem(archive_url).local()
+        target_path = os.getcwd() + '/Dataset'
+        print(f'fetching data locally to {target_path}')
+        with zipfile.ZipFile(archive_url, "r") as ref:
+            ref.extractall(target_path)
+        dataset_path=target_path
+    else:
+        print(f'using dataset path {dataset_path}')
+    
     # Build the dataset going through the classes directories and collecting the images:
     images = []
     labels = []
