@@ -17,6 +17,7 @@ from transformers import pipeline
 from keybert import KeyBERT
 import json
 import storey
+import redis
 
 def fetch_article(event):
     """
@@ -105,3 +106,6 @@ def kv_format(event):
             event.body[k] = json.dumps(v)
     
     return event
+
+def write_to_redis(event):
+    r = redis.Redis()
