@@ -244,7 +244,6 @@ def train(
 
     # Initialize the loss:
     loss = torch.nn.MSELoss()
-
     # Train the head of the network:
     mlrun_torch.train(
         model=model,
@@ -257,7 +256,7 @@ def train(
         training_iterations=35,
         model_name="mask_detector",
         custom_objects_map={"training-and-evaluation.py": "MaskDetector"},
-        custom_objects_directory=os.path.join(os.path.abspath(os.path.join(dataset_path, os.pardir)), "pytorch"),
+        custom_objects_directory='./',
         context=context,
     )
 
