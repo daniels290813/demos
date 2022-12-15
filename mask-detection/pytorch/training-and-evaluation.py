@@ -157,7 +157,7 @@ def _get_datasets(
         images_directory = os.path.join(dataset_path, directory)
         images_files = [
             os.path.join(images_directory, file)
-            for file in mlrun.get_dataitem(images_directory).listdir()#os.listdir(images_directory)
+            for file in mlrun.get_dataitem(images_directory).listdir()
             if '.jpg' in file
         ]
         for image_file in images_files:
