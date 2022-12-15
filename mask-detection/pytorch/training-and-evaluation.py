@@ -24,6 +24,7 @@ from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch.nn import Module
 from torch.utils.data import DataLoader, Dataset
+import io
 
 
 class MaskDetectionDataset(Dataset):
