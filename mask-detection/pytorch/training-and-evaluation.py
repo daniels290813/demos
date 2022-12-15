@@ -156,12 +156,12 @@ def _get_datasets(
         images_directory = os.path.join(dataset_path, directory)
         images_files = [
             os.path.join(images_directory, file)
-            for file in os.listdir(images_directory)
-            if os.path.isfile(os.path.join(images_directory, file))
+            for file in mlrun.get_dataitem(images_directory).listdir()#os.listdir(images_directory)
+            if '.jpg' in file
         ]
         for image_file in images_files:
             images.append(
-                Image.open(os.path.join(images_directory, image_file)).resize(
+                Image.open(io.BytesIO(mlrun.get_dataitem(image_file).get())).resize(
                     (224, 224)
                 )
             )

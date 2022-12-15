@@ -19,6 +19,8 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelBinarizer
 from tensorflow import keras
+import io
+from PIL import Image
 
 for gpu in tf.config.experimental.list_physical_devices("GPU"):
     tf.config.experimental.set_memory_growth(gpu, True)
@@ -47,13 +49,11 @@ def _get_datasets(
         images_directory = os.path.join(dataset_path, directory)
         images_files = [
             os.path.join(images_directory, file)
-            for file in os.listdir(images_directory)
-            if os.path.isfile(os.path.join(images_directory, file))
+            for file in mlrun.get_dataitem(images_directory).listdir()#os.listdir(images_directory)
+            if '.jpg' in file
         ]
         for image_file in images_files:
-            image = keras.preprocessing.image.load_img(
-                image_file, target_size=(224, 224)
-            )
+            image = Image.open(io.BytesIO(mlrun.get_dataitem(image_file).get())).resize((224, 224))
             image = keras.preprocessing.image.img_to_array(image)
             image = keras.applications.mobilenet_v2.preprocess_input(image)
             images.append(image)
