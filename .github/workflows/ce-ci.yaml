@@ -59,3 +59,11 @@ jobs:
         echo "MLRUN_STORAGE__AUTO_MOUNT_PARAMS='aws_access_key=minio,aws_secret_key=minio123,endpoint_url=http://minio.mlrun.svc.cluster.local:9000'" >> /tmp/examples_ci.env
         echo "MLRUN_STORAGE__AUTO_MOUNT_TYPE=s3" >> /tmp/examples_ci.env
         cat /tmp/examples_ci.env
+
+    - name: Installing jupyter on pod and running notebooks
+      run: |
+        jupyter_service=$(kubectl -n default-tenant get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
+        echo $jupyter_service
+        kubectl -n default-tenant exec -it $jupyter_service -- bash
+        conda install jupyter
+        jupyter run update-tutorials.ipynb
