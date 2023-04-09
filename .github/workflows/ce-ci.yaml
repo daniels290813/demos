@@ -46,7 +46,7 @@ jobs:
         --set global.registry.url=$(minikube ip):5000  --set global.registry.secretName=""   \
         --set global.externalHostAddress=$(minikube ip)  \
         --set nuclio.dashboard.externalIPAddresses[0]=$(minikube ip)  \
-        --wait --debug --timeout 1800 mlrun/mlrun-ce --version 0.6.0-rc1
+        --wait --debug --timeout=1h mlrun/mlrun-ce --version 0.6.0-rc1
 
     - name: Create environment file
       run: |
