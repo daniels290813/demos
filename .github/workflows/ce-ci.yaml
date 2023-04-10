@@ -65,6 +65,8 @@ jobs:
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
         echo "conda install jupyter;\
-              jupyter run update-tutorials.ipynb" > demos_script.sh
-        kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:demos_script.sh
-        kubectl exec -n mlrun $jupyter_service -- bash /User/demos_script.sh
+              jupyter run update-tutorials.ipynb \ 
+              echo echo $(pwd)" > demos_script.sh
+             
+        kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
+        kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
