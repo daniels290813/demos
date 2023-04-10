@@ -1,15 +1,39 @@
 name: Test functions
 
 on:
-  push:
-    branches:
-      - ce_ci
+  release:
+    types:
+      - created
 
 env:
   NAMESPACE: mlrun
   MLRUN_API_NODE_PORT: 30070
 
-jobs:     
+jobs:
+  release:
+    runs-on: ubuntu-18.04
+    steps:
+
+      - name: Dump github context
+        run: echo "$GITHUB_CONTEXT"
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+      - name: Dump runner context
+        run: echo "$RUNNER_CONTEXT"
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+
+      - name: Dump github ref
+        run: echo "$GITHUB_REF"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Extract ref info
+        run: |
+          echo "REF_BRANCH=$(echo ${GITHUB_REF#refs/heads/} | tr / -)" | tee -a $GITHUB_ENV
+          
+############################
   run_monorepo_tests:
     runs-on: ubuntu-20.04
     steps:
@@ -64,9 +88,8 @@ jobs:
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
-        echo "git clone https://github.com/v3io/tutorials.git;\
-              cd tutorials; \
-              jupyter run update-tutorials.ipynb" > demos_script.sh
+        echo "git clone --single-branch --branch ${{ env.REF_BRANCH }} https://github.com/daniels290813/demos.git; \
+              jupyter run demos/news-article-nlp/news-article-nlp.ipynb" > demos_script.sh
        
         kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
         kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
