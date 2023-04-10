@@ -64,6 +64,6 @@ jobs:
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
-        kubectl -n mlrun exec -it $jupyter_service -- bash
+        kubectl -n mlrun exec -i $jupyter_service -- bash
         conda install jupyter
         jupyter run update-tutorials.ipynb
