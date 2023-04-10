@@ -67,4 +67,4 @@ jobs:
         echo "conda install jupyter;\
               jupyter run update-tutorials.ipynb" > demos_script.sh
         kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:demos_script.sh
-        kubectl exec -n mlrun jupyter-dani-85c98cf577-rcjf6 -- bash /User/demos_script.sh
+        kubectl exec -n mlrun $jupyter_service -- bash /User/demos_script.sh
