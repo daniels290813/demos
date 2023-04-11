@@ -70,5 +70,5 @@ jobs:
         echo $(pwd)
        
         kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
-        kubectl cp $(pwd)/demos/* mlrun/$jupyter_service:/tmp/demos/*
+        kubectl cp $(pwd)/news-article-nlp/* mlrun/$jupyter_service:/tmp/demos/news-article-nlp/
         kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
