@@ -65,18 +65,26 @@ jobs:
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
-        echo "echo $(pwd) ; echo $(ls) ;
-              jupyter run /tmp/news-article-nlp/news_article_nlp.ipynb; 
-              jupyter run /tmp/mask-detection/1-training-and-evaluation.ipynb; 
-              jupyter run /tmp/mask-detection/2-serving.ipynb; 
-              jupyter run /tmp/mask-detection/3-automatic-pipeline.ipynb; " > demos_script.sh
+        echo "echo Creating conda env;
+              conda create -n ci;
+              conda activate ci;
+              echo Installing MLRun on new env;
+              conda install mlrun;
+              echo Running CE supported notebooks;
+              echo news-article-nlp;
+              jupyter execute /tmp/news-article-nlp/news_article_nlp.ipynb;
+              echo mask-detection;
+              jupyter execute /tmp/mask-detection/1-training-and-evaluation.ipynb; 
+              jupyter execute /tmp/mask-detection/2-serving.ipynb; 
+              jupyter execute /tmp/mask-detection/3-automatic-pipeline.ipynb; 
+              echo All notebooks ran successfully; " > demos_script.sh
               
-        echo "one"
+        echo "Copying demos running script to jupyter pod"
         kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
-        echo "two"
+        echo "Copying news-article-nlp demo to jupyter pod"
         kubectl cp $(pwd)/news-article-nlp mlrun/$jupyter_service:/tmp/news-article-nlp
-        echo "three"
+        echo "Copying mask-detection demo to jupyter pod"
         kubectl cp $(pwd)/mask-detection mlrun/$jupyter_service:/tmp/mask-detection
-        echo "four"
+        echo "Running demos script"
         kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
-        echo "DONE"
+        echo "CE demos ci finished"
