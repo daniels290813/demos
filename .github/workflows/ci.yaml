@@ -66,7 +66,7 @@ jobs:
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
         echo "echo $(pwd) ; echo $(ls) ;
-              jupyter run /tmp/news-article-nlp/news-article-nlp.ipynb; 
+              jupyter run /tmp/news-article-nlp/news_article_nlp.ipynb; 
               jupyter run /tmp/mask-detection/1-training-and-evaluation.ipynb; 
               jupyter run /tmp/mask-detection/2-serving.ipynb; 
               jupyter run /tmp/mask-detection/3-automatic-pipeline.ipynb; " > demos_script.sh
