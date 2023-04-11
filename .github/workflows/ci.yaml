@@ -66,11 +66,17 @@ jobs:
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
         echo "echo $(pwd) ; echo $(ls) ;
-              jupyter run /tmp/demos/news-article-nlp/news-article-nlp.ipynb" > demos_script.sh
-        echo $(ls)
-        echo $(pwd)
+              jupyter run /tmp/news-article-nlp/news-article-nlp.ipynb; 
+              jupyter run /tmp/mask-detection/1-training-and-evaluation.ipynb; 
+              jupyter run /tmp/mask-detection/2-serving.ipynb; 
+              jupyter run /tmp/mask-detection/3-automatic-pipeline.ipynb; " > demos_script.sh
+              
+        echo "one"
         kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
-        echo $(pwd)
-        kubectl cp $(pwd)/news-article-nlp/* mlrun/$jupyter_service:/tmp/demos/news-article-nlp/*
-        echo $(pwd)
+        echo "two"
+        kubectl cp $(pwd)/news-article-nlp mlrun/$jupyter_service:/tmp/news-article-nlp
+        echo "three"
+        kubectl cp $(pwd)/mask-detection mlrun/$jupyter_service:/tmp/mask-detection
+        echo "four"
         kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
+        echo "DONE"
