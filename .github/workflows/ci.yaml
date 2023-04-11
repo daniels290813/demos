@@ -61,7 +61,7 @@ jobs:
         cat /tmp/examples_ci.env
 
     - uses: actions/checkout@v3
-    - name: Installing jupyter on pod and running notebooks
+    - name: Running CE supported demos
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
