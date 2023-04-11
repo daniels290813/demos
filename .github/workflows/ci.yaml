@@ -67,6 +67,11 @@ jobs:
         echo $jupyter_service
         echo "echo Creating conda env;
               conda create -n ci;
+              echo Updating conda in env;
+              conda update -n ci -c conda-forge conda;
+              echo conda init bash;
+              conda init bash;
+              echo activating env;
               conda activate ci;
               echo Installing MLRun on new env;
               conda install mlrun;
