@@ -1,0 +1,74 @@
+name: Test functions
+
+on:
+  push:
+    branches:
+      - gh_workflow
+
+env:
+  NAMESPACE: mlrun
+  MLRUN_API_NODE_PORT: 30070
+
+jobs:     
+  run_monorepo_tests:
+    runs-on: ubuntu-20.04
+    steps:
+       ##Source
+    - uses: azure/setup-helm@v1
+      with:
+        version: "v3.11.2"
+
+    - uses: manusa/actions-setup-minikube@v2.7.1
+      with:
+        minikube version: "v1.26.0"
+        kubernetes version: "v1.23.9"
+        github token: ${{ github.token }}
+        driver: docker
+        start args: '--addons=registry --insecure-registry="192.168.49.2:5000"'
+
+    - name: Get mlrun kit charts and create namespace
+      run: |
+        helm repo add mlrun https://mlrun.github.io/ce
+        helm repo update
+        kubectl create namespace ${NAMESPACE}
+    - name: Install MLRun CE helm chart
+      run: |
+        helm install mlrun-ce --namespace ${NAMESPACE} \
+        --set minio.resources.requests.memory="128Mi" \
+        --set  jupyterNotebook.persistence.size="1Gi" \
+        --set  mlrun.db.persistence.size="1Gi" \
+        --set  mlrun.api.persistence.size="1Gi" \
+        --set  mpi-operator.deployment.create="false" \
+        --set  mlrun.httpDB.dbType="sqlite" \
+        --set  mlrun.httpDB.dirPath="/mlrun/db" \
+        --set  mlrun.httpDB.dsn="sqlite:////mlrun/db/mlrun.db?check_same_thread=false"  \
+        --set  mlrun.httpDB.oldDsn=""  \
+        --set global.registry.url=$(minikube ip):5000  --set global.registry.secretName=""   \
+        --set global.externalHostAddress=$(minikube ip)  \
+        --set nuclio.dashboard.externalIPAddresses[0]=$(minikube ip)  \
+        --wait --debug --timeout=1h mlrun/mlrun-ce --version 0.6.0-rc1
+
+    - name: Create environment file
+      run: |
+        kubectl get pods -A
+        kubectl get  nodes
+        echo "MLRUN_DBPATH=http://$(minikube ip):${MLRUN_API_NODE_PORT}" > /tmp/examples_ci.env
+        echo "AWS_ACCESS_KEY_ID=minio" >> /tmp/examples_ci.env
+        echo "AWS_SECRET_ACCESS_KEY=minio123" >> /tmp/examples_ci.env
+        echo "S3_ENDPOINT_URL=http://$(minikube ip):30080" >> /tmp/examples_ci.env
+        echo "MLRUN_STORAGE__AUTO_MOUNT_PARAMS='aws_access_key=minio,aws_secret_key=minio123,endpoint_url=http://minio.mlrun.svc.cluster.local:9000'" >> /tmp/examples_ci.env
+        echo "MLRUN_STORAGE__AUTO_MOUNT_TYPE=s3" >> /tmp/examples_ci.env
+        cat /tmp/examples_ci.env
+
+    - name: Installing jupyter on pod and running notebooks
+      uses: actions/checkout@v3
+      run: |
+        jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
+        echo $jupyter_service
+        echo "jupyter run /tmp/demos/news-article-nlp/news-article-nlp.ipynb" > demos_script.sh
+        echo $(ls)
+        echo $(pwd)
+       
+        kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
+        kubectl cp $(pwd)/demos/* mlrun/$jupyter_service:/tmp/demos/*
+        kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
