@@ -68,7 +68,7 @@ jobs:
         echo "echo Creating conda env;
               conda create -n conda-root-py python=3.7;
               echo Updating conda in env;
-              conda update -n base -c conda-forge conda;
+              conda update -n conda-root-py -c conda-forge conda;
               echo conda init bash;
               conda init bash;
               echo activating env;
