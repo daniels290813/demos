@@ -71,7 +71,6 @@ jobs:
               conda update -n base -c conda-forge conda;
               echo conda init bash;
               conda init bash;
-              exec bash
               echo activating env;
               conda activate conda-root-py;
               conda install ipykernel;
