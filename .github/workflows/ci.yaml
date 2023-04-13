@@ -69,8 +69,10 @@ jobs:
               conda create -n conda-root-py python=3.7;
               echo Updating conda in env;
               conda update -n conda-root-py -c conda-forge conda;
-              echo conda init bash;
+              echo init bash;
               conda init bash;
+              echo restarting shell;
+              exec bash;
               echo activating env;
               conda activate conda-root-py;
               conda install ipykernel;
