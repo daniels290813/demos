@@ -66,15 +66,16 @@ jobs:
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
         echo "echo Creating conda env;
-              conda create -n ci python=3.7;
+              conda create -n conda-root-py python=3.7;
               echo Updating conda in env;
-              conda update -n ci -c conda-forge conda;
+              conda update -n base -c conda-forge conda;
               echo conda init bash;
               conda init bash;
+              exec bash
               echo activating env;
-              conda activate ci;
+              conda activate conda-root-py;
               conda install ipykernel;
-              python -m ipykernel install --name='ci' --display-name='python CE testing' --user
+              python -m ipykernel install --name='conda-root-py' --display-name='Python [conda root]' --user
               echo Installing MLRun on new env;
               conda install mlrun;
               echo Running CE supported notebooks;
