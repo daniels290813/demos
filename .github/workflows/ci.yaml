@@ -64,7 +64,7 @@ jobs:
     - name: Running CE supported demos
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
-        echo Installing jupyter;
+        echo "echo Installing jupyter;
               pip install jupyter
 
               echo Installing MLRun on new env;
