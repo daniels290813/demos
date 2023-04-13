@@ -64,17 +64,12 @@ jobs:
     - name: Running CE supported demos
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
-        echo $jupyter_service
-        echo "echo Creating conda env;
-              conda create -n ci;
-              echo Updating conda in env;
-              conda update -n ci -c conda-forge conda;
-              echo conda init bash;
-              conda init bash;
-              echo activating env;
-              conda activate ci;
+        echo Installing jupyter;
+              pip install jupyter
+
               echo Installing MLRun on new env;
-              conda install mlrun;
+              pip install mlrun;
+              
               echo Running CE supported notebooks;
               echo news-article-nlp;
               jupyter execute /tmp/news-article-nlp/news_article_nlp.ipynb;
