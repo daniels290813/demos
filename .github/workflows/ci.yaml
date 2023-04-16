@@ -65,8 +65,16 @@ jobs:
       run: |
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
-        echo "echo Installing MLRun on new env;
-              conda install mlrun;
+        echo "echo Creating conda env;
+              conda create -n conda-root-py;
+              conda activate conda-root-py;
+              echo ipykernel install;
+              conda install ipykernel;
+              echo add env to ipykernel;
+              python -m ipykernel install --user --name conda-root-py --display-name 'Python (myenv)'
+              echo Installing MLRun on new env;
+              conda install pip;
+              pip install mlrun;
               echo Running CE supported notebooks;
               echo news-article-nlp;
               jupyter execute /tmp/news-article-nlp/news_article_nlp.ipynb;
