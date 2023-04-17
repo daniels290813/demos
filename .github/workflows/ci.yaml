@@ -66,22 +66,23 @@ jobs:
         jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
         echo $jupyter_service
         echo "echo Creating conda env;
-              conda create -n conda-root-py;
-              conda activate conda-root-py;
-              echo ipykernel install;
-              conda install ipykernel;
-              echo add env to ipykernel;
-              python -m ipykernel install --user --name conda-root-py --display-name 'Python (myenv)'
-              echo Installing MLRun on new env;
+              echo install pip;
               conda install pip;
+              echo install mlrun;
               pip install mlrun;
               echo Running CE supported notebooks;
               echo news-article-nlp;
-              jupyter execute /tmp/news-article-nlp/news_article_nlp.ipynb;
+              cd /tmp/news-article-nlp;
+              jupyter nbconvert --to script news_article_nlp.ipynb;
+              ipython news_article_nlp.py;
               echo mask-detection;
-              jupyter execute /tmp/mask-detection/1-training-and-evaluation.ipynb; 
-              jupyter execute /tmp/mask-detection/2-serving.ipynb; 
-              jupyter execute /tmp/mask-detection/3-automatic-pipeline.ipynb; 
+              cd /tmp/mask-detection;
+              jupyter nbconvert --to script 1-training-and-evaluation.ipynb;
+              ipython 1-training-and-evaluation.py;
+              jupyter nbconvert --to script 2-serving.ipynb;
+              ipython 2-serving.py;
+              jupyter nbconvert --to script 3-automatic-pipeline.ipynb;
+              ipython 3-automatic-pipeline.py;
               echo All notebooks ran successfully; " > demos_script.sh
               
         echo "Copying demos running script to jupyter pod"
