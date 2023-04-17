@@ -24,73 +24,73 @@ jobs:
         kubernetes version: "v1.23.9"
         github token: ${{ github.token }}
         driver: docker
-        start args: '--addons=registry --insecure-registry="192.168.49.2:5000" --memory="max" --cpus="max" --disk-size "6000mb" '
+        start args: '--addons=registry --insecure-registry="192.168.49.2:5000" --memory="max" --cpus="max" --disk-size "10000mb" '
 
-#    - name: Get mlrun kit charts and create namespace
-#      run: |
-#        helm repo add mlrun https://mlrun.github.io/ce
-#        helm repo update
-#        kubectl create namespace ${NAMESPACE}
-#    - name: Install MLRun CE helm chart
-#      run: |
-#        helm install mlrun-ce --namespace ${NAMESPACE} \
-#        --set minio.resources.requests.memory="128Mi" \
-#        --set  jupyterNotebook.persistence.size="1Gi" \
-#        --set  mlrun.db.persistence.size="1Gi" \
-#        --set  mlrun.api.persistence.size="1Gi" \
-#        --set  mpi-operator.deployment.create="false" \
-#        --set  mlrun.httpDB.dbType="sqlite" \
-#        --set  mlrun.httpDB.dirPath="/mlrun/db" \
-#        --set  mlrun.httpDB.dsn="sqlite:////mlrun/db/mlrun.db?check_same_thread=false"  \
-#        --set  mlrun.httpDB.oldDsn=""  \
-#        --set global.registry.url=$(minikube ip):5000  --set global.registry.secretName=""   \
-#        --set global.externalHostAddress=$(minikube ip)  \
-#        --set nuclio.dashboard.externalIPAddresses[0]=$(minikube ip)  \
-#        --wait --debug --timeout=1h mlrun/mlrun-ce --version 0.6.0-rc1
-#
-#    - name: Create environment file
-#      run: |
-#        kubectl get pods -A
-#        kubectl get  nodes
-#        echo "MLRUN_DBPATH=http://$(minikube ip):${MLRUN_API_NODE_PORT}" > /tmp/examples_ci.env
-#        echo "AWS_ACCESS_KEY_ID=minio" >> /tmp/examples_ci.env
-#        echo "AWS_SECRET_ACCESS_KEY=minio123" >> /tmp/examples_ci.env
-#        echo "S3_ENDPOINT_URL=http://$(minikube ip):30080" >> /tmp/examples_ci.env
-#        echo "MLRUN_STORAGE__AUTO_MOUNT_PARAMS='aws_access_key=minio,aws_secret_key=minio123,endpoint_url=http://minio.mlrun.svc.cluster.local:9000'" >> /tmp/examples_ci.env
-#        echo "MLRUN_STORAGE__AUTO_MOUNT_TYPE=s3" >> /tmp/examples_ci.env
-#        cat /tmp/examples_ci.env
-#
-#    - uses: actions/checkout@v3
-#    - name: Running CE supported demos
-#      run: |
-#        jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
-#        echo $jupyter_service
-#        echo "echo Creating conda env;
-#              echo install pip;
-#              conda install pip;
-#              echo install mlrun;
-#              pip install mlrun;
-#              echo Running CE supported notebooks;
-#              echo news-article-nlp;
-#              cd /tmp/news-article-nlp;
-#              jupyter nbconvert --to script news_article_nlp.ipynb;
-#              ipython news_article_nlp.py;
-#              echo mask-detection;
-#              cd /tmp/mask-detection;
-#              jupyter nbconvert --to script 1-training-and-evaluation.ipynb;
-#              ipython 1-training-and-evaluation.py;
-#              jupyter nbconvert --to script 2-serving.ipynb;
-#              ipython 2-serving.py;
-#              jupyter nbconvert --to script 3-automatic-pipeline.ipynb;
-#              ipython 3-automatic-pipeline.py;
-#              echo All notebooks ran successfully; " > demos_script.sh
-#              
-#        echo "Copying demos running script to jupyter pod"
-#        kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
-#        echo "Copying news-article-nlp demo to jupyter pod"
-#        kubectl cp $(pwd)/news-article-nlp mlrun/$jupyter_service:/tmp/news-article-nlp
-#        echo "Copying mask-detection demo to jupyter pod"
-#        kubectl cp $(pwd)/mask-detection mlrun/$jupyter_service:/tmp/mask-detection
-#        echo "Running demos script"
-#        kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
-#        echo "CE demos ci finished"
+    - name: Get mlrun kit charts and create namespace
+      run: |
+        helm repo add mlrun https://mlrun.github.io/ce
+        helm repo update
+        kubectl create namespace ${NAMESPACE}
+    - name: Install MLRun CE helm chart
+      run: |
+        helm install mlrun-ce --namespace ${NAMESPACE} \
+        --set minio.resources.requests.memory="128Mi" \
+        --set  jupyterNotebook.persistence.size="1Gi" \
+        --set  mlrun.db.persistence.size="1Gi" \
+        --set  mlrun.api.persistence.size="1Gi" \
+        --set  mpi-operator.deployment.create="false" \
+        --set  mlrun.httpDB.dbType="sqlite" \
+        --set  mlrun.httpDB.dirPath="/mlrun/db" \
+        --set  mlrun.httpDB.dsn="sqlite:////mlrun/db/mlrun.db?check_same_thread=false"  \
+        --set  mlrun.httpDB.oldDsn=""  \
+        --set global.registry.url=$(minikube ip):5000  --set global.registry.secretName=""   \
+        --set global.externalHostAddress=$(minikube ip)  \
+        --set nuclio.dashboard.externalIPAddresses[0]=$(minikube ip)  \
+        --wait --debug --timeout=1h mlrun/mlrun-ce --version 0.6.0-rc1
+
+    - name: Create environment file
+      run: |
+        kubectl get pods -A
+        kubectl get  nodes
+        echo "MLRUN_DBPATH=http://$(minikube ip):${MLRUN_API_NODE_PORT}" > /tmp/examples_ci.env
+        echo "AWS_ACCESS_KEY_ID=minio" >> /tmp/examples_ci.env
+        echo "AWS_SECRET_ACCESS_KEY=minio123" >> /tmp/examples_ci.env
+        echo "S3_ENDPOINT_URL=http://$(minikube ip):30080" >> /tmp/examples_ci.env
+        echo "MLRUN_STORAGE__AUTO_MOUNT_PARAMS='aws_access_key=minio,aws_secret_key=minio123,endpoint_url=http://minio.mlrun.svc.cluster.local:9000'" >> /tmp/examples_ci.env
+        echo "MLRUN_STORAGE__AUTO_MOUNT_TYPE=s3" >> /tmp/examples_ci.env
+        cat /tmp/examples_ci.env
+
+    - uses: actions/checkout@v3
+    - name: Running CE supported demos
+      run: |
+        jupyter_service=$(kubectl -n mlrun get pods --no-headers -o custom-columns=":metadata.name"|grep jupyter)
+        echo $jupyter_service
+        echo "echo Creating conda env;
+              echo install pip;
+              conda install pip;
+              echo install mlrun;
+              pip install mlrun;
+              echo Running CE supported notebooks;
+              echo news-article-nlp;
+              cd /tmp/news-article-nlp;
+              jupyter nbconvert --to script news_article_nlp.ipynb;
+              ipython news_article_nlp.py;
+              echo mask-detection;
+              cd /tmp/mask-detection;
+              jupyter nbconvert --to script 1-training-and-evaluation.ipynb;
+              ipython 1-training-and-evaluation.py;
+              jupyter nbconvert --to script 2-serving.ipynb;
+              ipython 2-serving.py;
+              jupyter nbconvert --to script 3-automatic-pipeline.ipynb;
+              ipython 3-automatic-pipeline.py;
+              echo All notebooks ran successfully; " > demos_script.sh
+              
+        echo "Copying demos running script to jupyter pod"
+        kubectl cp $(pwd)/demos_script.sh mlrun/$jupyter_service:/tmp/demos_script.sh
+        echo "Copying news-article-nlp demo to jupyter pod"
+        kubectl cp $(pwd)/news-article-nlp mlrun/$jupyter_service:/tmp/news-article-nlp
+        echo "Copying mask-detection demo to jupyter pod"
+        kubectl cp $(pwd)/mask-detection mlrun/$jupyter_service:/tmp/mask-detection
+        echo "Running demos script"
+        kubectl exec -n mlrun $jupyter_service -- bash /tmp/demos_script.sh
+        echo "CE demos ci finished"
